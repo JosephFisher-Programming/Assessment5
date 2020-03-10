@@ -14,6 +14,7 @@ public class basicNavScript : MonoBehaviour
     public float maxSpeed;
     public float turnSpeed;
     int cornerNum = 0;
+    float timer = 1;
 
     Vector3 force;
     Vector3 v;
@@ -31,8 +32,16 @@ public class basicNavScript : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void MoveToTarget()
     {
+        if (timer < 1)
+        {
+            NavMesh.CalculatePath(transform.position, target.position, NavMesh.AllAreas, personalPath);
+            cornerNum = 0;
+        }
+
+        
+
         if (cornerNum + 1 > personalPath.corners.Length)
         {
             cornerNum--;
@@ -44,19 +53,26 @@ public class basicNavScript : MonoBehaviour
             cornerNum = 0;
         }
 
-        if(Vector3.Distance(transform.position, personalPath.corners[cornerNum+1]) < 1.1f)
+        if(Vector3.Distance(transform.position, personalPath.corners[cornerNum+1]) < 1.6f)
         {
             cornerNum++;
         }
 
-        for (int i = 0; i < personalPath.corners.Length - 1; i++)
-        {
-            Debug.DrawLine(personalPath.corners[i], personalPath.corners[i + 1], Color.red);
-        }
+        
         Debug.DrawLine(transform.position, personalPath.corners[cornerNum+1], Color.blue);
         Debug.Log(Vector3.Distance(transform.position, personalPath.corners[cornerNum + 1]));
         Seek(personalPath.corners[cornerNum + 1]);
         prevPosition = target.position;
+    }
+
+    public void Update()
+    {
+       timer -= Time.deltaTime;
+       for (int i = 0; i < personalPath.corners.Length - 1; i++)
+        {
+            Debug.DrawLine(personalPath.corners[i], personalPath.corners[i + 1], Color.red);
+        }
+       
     }
 
     void Seek(Vector3 cornerVal)
@@ -64,7 +80,7 @@ public class basicNavScript : MonoBehaviour
         v = (cornerVal - transform.position).normalized * speed;
         force = v - velocity;
         velocity += force;
-        velocity = Vector3.ClampMagnitude(velocity, Vector3.Distance(transform.position, personalPath.corners[cornerNum + 1]));
+        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
         if (velocity != Vector3.zero)
         {
             Quaternion goalRotation = Quaternion.LookRotation(velocity.normalized);
@@ -74,4 +90,22 @@ public class basicNavScript : MonoBehaviour
 
         Debug.DrawRay(transform.position, transform.forward * 10, Color.green);
     }
+
+    void Flee(Vector3 cornerVal)
+    {
+        v = (cornerVal - transform.position).normalized * speed;
+        force = v - velocity;
+        velocity += force;
+        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
+        if (velocity != Vector3.zero)
+        {
+            Quaternion goalRotation = Quaternion.LookRotation(velocity.normalized);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, goalRotation, turnSpeed * Time.deltaTime);
+        }
+        transform.position += transform.forward * velocity.magnitude * Time.deltaTime;
+
+        Debug.DrawRay(transform.position, transform.forward * 10, Color.green);
+    }
+
+
 }

@@ -4,15 +4,262 @@ using UnityEngine;
 
 public class Assessment5Runner : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public EnemyNearby enemCheck;
+    public basicNavScript navAgent;
+    IDecision curDec;
+    public GameObject enemy;
+    public GameObject[] targets;
+    public int curTar = 0;
+    public int foodCount = 0;
+    public int foodCap = 500;
+    public int health = 100;
+
     void Start()
     {
-        
+        enemCheck = new EnemyNearby(this,
+                            new CheckNearSaferoom(this,
+                                new healCharScript(this),
+                                new MoveTowardsArea(this)),
+                            new FullOfFood(this,
+                                new CheckNearSilo(this, 
+                                    new FoodDepositScript(this),
+                                    new MoveTowardsArea(this)),
+                                new CheckNearFarm(this,
+                                    new FoodCollectScript(this),
+                                    new MoveTowardsArea(this))));
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        curDec = enemCheck;
+        while (curDec != null)
+        {
+            curDec = curDec.MakeDecision();
+        }
+    }
+}
+
+public class EnemyNearby : IDecision
+{
+    Assessment5Runner runner;
+    IDecision yes;
+    IDecision no;
+
+    public EnemyNearby()
+    {
+        runner = null;
+    }
+
+    public EnemyNearby(Assessment5Runner runner, IDecision yes, IDecision no)
+    {
+        this.runner = runner;
+        this.yes = yes;
+        this.no = no;
+    }
+
+    public IDecision MakeDecision()
+    {
+        float distance = Vector3.Distance(runner.transform.position, runner.enemy.transform.position);
+        return (distance < 5f ? yes : no);
+    }
+}
+
+public class FullOfFood : IDecision
+{
+    Assessment5Runner runner;
+    IDecision yes;
+    IDecision no;
+
+    public FullOfFood()
+    {
+        runner = null;
+    }
+
+    public FullOfFood(Assessment5Runner runner, IDecision yes, IDecision no)
+    {
+        this.runner = runner;
+        this.yes = yes;
+        this.no = no;
+    }
+
+    public IDecision MakeDecision()
+    {
+        if (runner.foodCount >= runner.foodCap)
+        {
+            runner.curTar = 1;
+            return yes;
+        }
+
+        runner.curTar = 2;
+        return no;
+    }
+}
+
+public class CheckNearSaferoom : IDecision
+{
+    Assessment5Runner runner;
+    IDecision yes;
+    IDecision no;
+
+    public CheckNearSaferoom()
+    {
+        runner = null;
+        yes = null;
+        no = null;
+    }
+
+    public CheckNearSaferoom(Assessment5Runner runner, IDecision yes, IDecision no)
+    {
+        this.runner = runner;
+        this.yes = yes;
+        this.no = no;
+    }
+
+    public IDecision MakeDecision()
+    {
+        runner.curTar = 0;
+        float distance = Vector3.Distance(runner.transform.position, runner.targets[0].transform.position);
+        return (distance < 2f ? yes : no);
+    }
+}
+
+public class CheckNearSilo : IDecision
+{
+    Assessment5Runner runner;
+    IDecision yes;
+    IDecision no;
+
+    public CheckNearSilo()
+    {
+        runner = null;
+        yes = null;
+        no = null;
+    }
+
+    public CheckNearSilo(Assessment5Runner runner, IDecision yes, IDecision no)
+    {
+        this.runner = runner;
+        this.yes = yes;
+        this.no = no;
+    }
+
+    public IDecision MakeDecision()
+    {
+        float distance = Vector3.Distance(runner.transform.position, runner.targets[1].transform.position);
+        return (distance < 2f ? yes : no);
+    }
+}
+
+public class CheckNearFarm : IDecision
+{
+    Assessment5Runner runner;
+    IDecision yes;
+    IDecision no;
+
+    public CheckNearFarm()
+    {
+        runner = null;
+        yes = null;
+        no = null;
+    }
+
+    public CheckNearFarm(Assessment5Runner runner, IDecision yes, IDecision no)
+    {
+        this.runner = runner;
+        this.yes = yes;
+        this.no = no;
+    }
+
+    public IDecision MakeDecision()
+    {
+        float distance = Vector3.Distance(runner.transform.position, runner.targets[2].transform.position);
+        return (distance < 2f ? yes : no);
+    }
+}
+
+
+public class MoveTowardsArea : IDecision
+{
+    Assessment5Runner runner;
+
+    public MoveTowardsArea()
+    {
+        runner = null;
+    }
+
+    public MoveTowardsArea(Assessment5Runner runner)
+    {
+        this.runner = runner;
+    }
+
+    public IDecision MakeDecision()
+    {
+        runner.navAgent.target = runner.targets[runner.curTar].transform;
+        runner.navAgent.MoveToTarget();
+        return null;
+    }
+}
+
+public class FoodCollectScript : IDecision
+{
+    Assessment5Runner runner;
+
+    public FoodCollectScript()
+    {
+        runner = null;
+    }
+
+    public FoodCollectScript(Assessment5Runner runner)
+    {
+        this.runner = runner;
+    }
+
+    public IDecision MakeDecision()
+    {
+        runner.foodCount++;
+        return null;
+    }
+}
+
+public class FoodDepositScript : IDecision
+{
+    Assessment5Runner runner;
+
+    public FoodDepositScript()
+    {
+        runner = null;
+    }
+
+    public FoodDepositScript(Assessment5Runner runner)
+    {
+        this.runner = runner;
+    }
+
+    public IDecision MakeDecision()
+    {
+        runner.foodCount = 0;
+        return null;
+    }
+}
+
+public class healCharScript : IDecision
+{
+    Assessment5Runner runner;
+
+    public healCharScript()
+    {
+        runner = null;
+    }
+
+    public healCharScript(Assessment5Runner runner)
+    {
+        this.runner = runner;
+    }
+
+    public IDecision MakeDecision()
+    {
+        runner.health = 100;
+        runner.gameObject.transform.position = new Vector3(-10, 2, -10);
+        return null;
     }
 }
