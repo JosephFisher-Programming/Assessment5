@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Assessment5Runner : MonoBehaviour
 {
+    //  All variables needed to create a Decision Tree.
     public EnemyNearby enemCheck;
     public basicNavScript navAgent;
     IDecision curDec;
@@ -12,13 +13,13 @@ public class Assessment5Runner : MonoBehaviour
     public int curTar = 0;
     public int foodCount = 0;
     public int foodCap = 500;
-    public int health = 100;
 
+    //  Start void to create the decision tree.
     void Start()
     {
         enemCheck = new EnemyNearby(this,
                             new CheckNearSaferoom(this,
-                                new healCharScript(this),
+                                new runToSafeRoomScript(this),
                                 new MoveTowardsArea(this)),
                             new FullOfFood(this,
                                 new CheckNearSilo(this, 
@@ -29,6 +30,7 @@ public class Assessment5Runner : MonoBehaviour
                                     new MoveTowardsArea(this))));
     }
 
+    //  Every frame makes a decision on what to do;
     private void Update()
     {
         curDec = enemCheck;
@@ -39,6 +41,8 @@ public class Assessment5Runner : MonoBehaviour
     }
 }
 
+
+//  Decision that determines if the Enemy is close by.
 public class EnemyNearby : IDecision
 {
     Assessment5Runner runner;
@@ -64,6 +68,7 @@ public class EnemyNearby : IDecision
     }
 }
 
+//  Decision that checks how much food the player is holding.
 public class FullOfFood : IDecision
 {
     Assessment5Runner runner;
@@ -95,6 +100,7 @@ public class FullOfFood : IDecision
     }
 }
 
+//  Makes a decision based on how far you are from the Saferoom.
 public class CheckNearSaferoom : IDecision
 {
     Assessment5Runner runner;
@@ -123,6 +129,7 @@ public class CheckNearSaferoom : IDecision
     }
 }
 
+//  Makes a decision based on how far you are from the Silo.
 public class CheckNearSilo : IDecision
 {
     Assessment5Runner runner;
@@ -150,6 +157,7 @@ public class CheckNearSilo : IDecision
     }
 }
 
+//  Makes a decision based on how far you are from the Farm.
 public class CheckNearFarm : IDecision
 {
     Assessment5Runner runner;
@@ -177,7 +185,7 @@ public class CheckNearFarm : IDecision
     }
 }
 
-
+//  Sets the NavScript target to this scripts current target and moves toward it.
 public class MoveTowardsArea : IDecision
 {
     Assessment5Runner runner;
@@ -200,6 +208,7 @@ public class MoveTowardsArea : IDecision
     }
 }
 
+//  Collects food while at the Farm.
 public class FoodCollectScript : IDecision
 {
     Assessment5Runner runner;
@@ -221,6 +230,7 @@ public class FoodCollectScript : IDecision
     }
 }
 
+//  Deposits food while close to the silo.
 public class FoodDepositScript : IDecision
 {
     Assessment5Runner runner;
@@ -242,23 +252,23 @@ public class FoodDepositScript : IDecision
     }
 }
 
-public class healCharScript : IDecision
+//  When they are close to the safehouse, teleport them to the trapdoor.
+public class runToSafeRoomScript : IDecision
 {
     Assessment5Runner runner;
 
-    public healCharScript()
+    public runToSafeRoomScript()
     {
         runner = null;
     }
 
-    public healCharScript(Assessment5Runner runner)
+    public runToSafeRoomScript(Assessment5Runner runner)
     {
         this.runner = runner;
     }
 
     public IDecision MakeDecision()
     {
-        runner.health = 100;
         runner.gameObject.transform.position = new Vector3(-10, 2, -10);
         return null;
     }

@@ -66,7 +66,6 @@
     <Compile Include="Assets\Scripts\IDecision.cs" />
     <Compile Include="Assets\Scripts\basicNavScript.cs" />
     <Compile Include="Assets\Scripts\enemyAIScript.cs" />
-    <Compile Include="Assets\Scripts\mineTreeRunner.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/s199027/source/repos/Assessment5/UnityProj/Assessment5/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
